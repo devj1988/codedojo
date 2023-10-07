@@ -1,0 +1,5 @@
+server.port: 8083
+solution.driver:
+  path: ./drivers
+  python: pythonDriver.py
+solution.tmpDir: ./tmpSol

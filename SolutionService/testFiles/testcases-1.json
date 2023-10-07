@@ -1,0 +1,13 @@
+{
+    "entryPoint": "fibonacci",
+    "testcases": [
+        {
+            "input": [1],
+            "output": 0
+        },
+        {
+            "input": [5],
+            "output": 3
+        }
+    ]
+}
