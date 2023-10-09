@@ -90,7 +90,7 @@ def runTests(obj, testSpecs, exit_on_error=True, timeoutSec=5):
     tracemalloc.stop()
     summary["peak_mem_usage_formatted"] = bytesFormat(peak)
     summary["peak_mem_usage_bytes"] = peak
-    summary["cpu_time_taken_s"] = elapsed_s
+    summary["cpu_time_taken_s"] = f"{elapsed_s:.3f}"
     return summary
 
 
