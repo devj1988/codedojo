@@ -1,37 +1,38 @@
-import sys, json, importlib, os, traceback, tracemalloc, time, signal, argparse
+import json, importlib, traceback, tracemalloc, time, signal, argparse
 
-def bytesFormat(totalBytes):
-    if totalBytes < 1024:
-        return f"{totalBytes} B"
-    if totalBytes > 1024 and totalBytes < 1024*1024:
-        return f"{totalBytes/1024:.2f} KB"
-    return f"{totalBytes/(1024*1024):.2f} MB"
+def format_bytes(total_bytes):
+    if total_bytes < 1024:
+        return f"{total_bytes} B"
+    if total_bytes > 1024 and total_bytes < 1024*1024:
+        return f"{total_bytes/1024:.2f} KB"
+    return f"{total_bytes/(1024*1024):.2f} MB"
 
-def logDriverMessage(msg):
+def log_driver_message(msg):
     print(f"DRIVER_MSG {msg}")
 
-def readJson(testfile):
+def read_json_from_file(testfile):
     with open(testfile, 'r') as f:
         return json.loads(f.read())
 
 class TimeoutException(Exception):
     "Raised on Timeout"
     pass
+
 def timeout_handler(signum, frame):
     raise TimeoutException("Timed out!")
 
-def getSolutionObj(usercodeModuleName):
+def get_solution_obj(usercode_module_name):
     importlib.invalidate_caches()
-    module = __import__(usercodeModuleName)
+    module = __import__(usercode_module_name)
     if not hasattr(module, 'Solution'):
         return None
-    solutionClass = getattr(module, 'Solution')
-    return solutionClass()
+    solution_class = getattr(module, 'Solution')
+    return solution_class()
 
-def runTests(obj, testSpecs, exit_on_error=True, timeoutSec=5):
-    func = getattr(obj, testSpecs['entryPoint'])
+def run_tests(obj, test_specs, exit_on_error=True, timeout_sec=5):
+    func = getattr(obj, test_specs['entryPoint'])
     summary = {
-        "total": len(testSpecs['testcases']),
+        "total": len(test_specs['testcases']),
         "passed": 0,
         "failed": 0,
         "run": 0
@@ -39,10 +40,10 @@ def runTests(obj, testSpecs, exit_on_error=True, timeoutSec=5):
     tracemalloc.start()
     start = time.process_time()
     signal.signal(signal.SIGALRM, timeout_handler)
-    signal.alarm(timeoutSec)
-    for i, case in enumerate(testSpecs['testcases']):
+    signal.alarm(timeout_sec)
+    for i, case in enumerate(test_specs['testcases']):
         inp = case["input"]
-        logDriverMessage(json.dumps({
+        log_driver_message(json.dumps({
             "case": i+1,
             "status": "RUNNING"
         }))
@@ -56,7 +57,7 @@ def runTests(obj, testSpecs, exit_on_error=True, timeoutSec=5):
             print("hello", e)
             summary["failed"] += 1
             formatted_lines = traceback.format_exc().splitlines()
-            logDriverMessage(json.dumps({
+            log_driver_message(json.dumps({
                 "case": i+1,
                 "result": "FAIL",
                 "details": {
@@ -68,13 +69,13 @@ def runTests(obj, testSpecs, exit_on_error=True, timeoutSec=5):
             else:
                 continue
         if out == case["output"]:
-            logDriverMessage(json.dumps({
+            log_driver_message(json.dumps({
                 "case": i+1,
                 "result": "PASS"
             }))
             summary["passed"] += 1
         else:
-            logDriverMessage(json.dumps({
+            log_driver_message(json.dumps({
                 "case": i+1,
                 "result": "FAIL",
                 "details": {
@@ -84,27 +85,28 @@ def runTests(obj, testSpecs, exit_on_error=True, timeoutSec=5):
                 }
             }))
             summary["failed"] += 1
+    signal.alarm(0)
     end = time.process_time()
-    elapsed_s = end-start
+    elapsed_s = end - start
     current, peak = tracemalloc.get_traced_memory()
     tracemalloc.stop()
-    summary["peak_mem_usage_formatted"] = bytesFormat(peak)
+    summary["peak_mem_usage_formatted"] = format_bytes(peak)
     summary["peak_mem_usage_bytes"] = peak
     summary["cpu_time_taken_s"] = f"{elapsed_s:.3f}"
     return summary
 
 
-def runSolution(solutionObj, testSpecs, timeout, exit_on_error):
+def run_solution(solution_obj, test_specs, timeout, exit_on_error):
     ret = {"exit": True, "error": False}
-    if solutionObj is None:
+    if solution_obj is None:
         ret["error"] = True
         ret["error_msg"] = "Solution class not found"
-    elif not hasattr(solutionObj, testSpecs['entryPoint']):
+    elif not hasattr(solution_obj, test_specs['entryPoint']):
         ret["error"] = True
-        ret["error_msg"] = f"entryPoint {testSpecs['entryPoint']} not found"
+        ret["error_msg"] = f"entryPoint {test_specs['entryPoint']} not found"
     else:
         try:
-            summary = runTests(solutionObj, testSpecs, exit_on_error, timeoutSec=timeout)
+            summary = run_tests(solution_obj, test_specs, exit_on_error, timeout_sec=timeout)
             ret["summary"] = summary
         except Exception as e:
             ret["error"] = True
@@ -121,9 +123,9 @@ def parse_args():
 
 def main():
     args = parse_args()
-    testSpecs = readJson(args.testSpecFile)
-    solutionObj = getSolutionObj(args.usercodeFile)
-    ret = runSolution(solutionObj, testSpecs, args.timeout, args.exitOnError)
-    logDriverMessage(json.dumps(ret))
+    test_specs = read_json_from_file(args.testSpecFile)
+    solution_obj = get_solution_obj(args.usercodeFile)
+    ret = run_solution(solution_obj, test_specs, args.timeout, args.exitOnError)
+    log_driver_message(json.dumps(ret))
 
 main()

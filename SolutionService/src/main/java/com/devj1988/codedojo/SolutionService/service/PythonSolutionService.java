@@ -24,6 +24,9 @@ public class PythonSolutionService {
     @Value("${solution.driver.python}")
     String pythonDriver;
 
+    @Value("${solution.driver.stdoutLineLimit:100}")
+    int stdoutLineLimit;
+
     private boolean sanityCheck(String code) {
         return !code.contains("import os");
     }
@@ -42,7 +45,8 @@ public class PythonSolutionService {
             // fetch test cases filename
             String testCaseFile = getTestFile();
             // run code and stream output
-            String[] cmd = getCmd(userCodeFile, testCaseFile);
+            boolean earlyExitOnError = !submissionRequest.isSampleRun();
+            String[] cmd = getCmd(userCodeFile, testCaseFile, earlyExitOnError);
 
             Process process = null;
             try {
@@ -52,11 +56,15 @@ public class PythonSolutionService {
                 StringBuilder stdout = new StringBuilder();
                 StringBuilder stdErr = new StringBuilder();
                 String line = null;
+                int stdoutLineCount = 0;
                 while ((line = stdoutReader.readLine()) != null) {
                     if (line.startsWith("DRIVER_MSG")) {
                         sink.next(line);
                     } else {
-                        stdout.append(line + "\n");
+                        stdoutLineCount++;
+                        if (stdoutLineCount < stdoutLineLimit) {
+                            stdout.append(line + "\n");
+                        }
                     }
                 }
                 while ((line = stderrReader.readLine()) != null) {
@@ -72,8 +80,9 @@ public class PythonSolutionService {
         });
     }
 
-    private String[] getCmd(String userCodeFile, String testFile) {
-        String cmd = String.format("python3 %s %s %s", solutionTmpDir + "/" + pythonDriver, userCodeFile, testFile);
+    private String[] getCmd(String userCodeFile, String testFile, boolean earlyExitOnError) {
+        String cmd = String.format("python3 %s --usercodeFile=%s --testSpecFile=%s --exitOnError=%s",
+                solutionTmpDir + "/" + pythonDriver, userCodeFile, testFile, earlyExitOnError);
         return cmd.split(" ");
     }
 

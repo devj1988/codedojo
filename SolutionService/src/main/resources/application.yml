@@ -2,4 +2,5 @@ server.port: 8083
 solution.driver:
   path: ./drivers
   python: pythonDriver.py
+  stdoutLineLimit: 100
 solution.tmpDir: ./tmpSol
