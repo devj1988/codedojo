@@ -1,5 +1,6 @@
 import json, importlib, traceback, tracemalloc, time, signal, argparse
 
+
 def format_bytes(total_bytes):
     if total_bytes < 1024:
         return f"{total_bytes} B"
@@ -7,19 +8,24 @@ def format_bytes(total_bytes):
         return f"{total_bytes/1024:.2f} KB"
     return f"{total_bytes/(1024*1024):.2f} MB"
 
+
 def log_driver_message(msg):
     print(f"DRIVER_MSG {msg}")
+
 
 def read_json_from_file(testfile):
     with open(testfile, 'r') as f:
         return json.loads(f.read())
 
+
 class TimeoutException(Exception):
     "Raised on Timeout"
     pass
 
+
 def timeout_handler(signum, frame):
     raise TimeoutException("Timed out!")
+
 
 def get_solution_obj(usercode_module_name):
     importlib.invalidate_caches()
@@ -29,10 +35,12 @@ def get_solution_obj(usercode_module_name):
     solution_class = getattr(module, 'Solution')
     return solution_class()
 
+
 def run_tests(obj, test_specs, exit_on_error=True, timeout_sec=5):
-    func = getattr(obj, test_specs['entryPoint'])
+    entrypoint_func = getattr(obj, test_specs['entryPoint'])
+    total_cases = len(test_specs['testcases'])
     summary = {
-        "total": len(test_specs['testcases']),
+        "total": total_cases,
         "passed": 0,
         "failed": 0,
         "run": 0
@@ -41,6 +49,10 @@ def run_tests(obj, test_specs, exit_on_error=True, timeout_sec=5):
     start = time.process_time()
     signal.signal(signal.SIGALRM, timeout_handler)
     signal.alarm(timeout_sec)
+    log_driver_message(json.dumps({
+        "status": "init",
+        "total": total_cases
+    }))
     for i, case in enumerate(test_specs['testcases']):
         inp = case["input"]
         log_driver_message(json.dumps({
@@ -49,7 +61,7 @@ def run_tests(obj, test_specs, exit_on_error=True, timeout_sec=5):
         }))
         try:
             summary["run"] += 1
-            out = func(*inp)
+            out = entrypoint_func(*inp)
         except TimeoutException as e:
             summary["timeout"] = True
             return summary
@@ -113,6 +125,7 @@ def run_solution(solution_obj, test_specs, timeout, exit_on_error):
             ret["error_msg"] = str(e)
     return ret
 
+
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--usercodeFile', help='user code file', required=True)
@@ -121,11 +134,13 @@ def parse_args():
     parser.add_argument('--exitOnError', help='if True, will not remaining tests and exit early', type=bool, default=True)
     return parser.parse_args()
 
+
 def main():
     args = parse_args()
     test_specs = read_json_from_file(args.testSpecFile)
     solution_obj = get_solution_obj(args.usercodeFile)
     ret = run_solution(solution_obj, test_specs, args.timeout, args.exitOnError)
     log_driver_message(json.dumps(ret))
+
 
 main()
