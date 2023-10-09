@@ -25,13 +25,20 @@ export const Body = () => {
         getProblem();
     }, []);
 
+  const initialCode = `class Solution:
+  def fibonacci(n):
+    # your code here
+    haha
+
+`;
+
   return (
     <div className='Body' style={{display: 'flex', flexDirection: 'row'}}>
         <div style={{width: '50%', height: '100%'}}>
             <Problem />
         </div>
         <div style={{width: '50%', height: '100%'}}>
-            <SolutionPane className="SolutionPane" />
+            <SolutionPane className="SolutionPane" initialCode={initialCode}/>
         </div>
     </div>);
 }

@@ -36,7 +36,7 @@ def get_solution_obj(usercode_module_name):
     return solution_class()
 
 
-def run_tests(obj, test_specs, exit_on_error=True, timeout_sec=5):
+def run_tests(obj, test_specs, exit_on_error=True, timeout_sec=10):
     entrypoint_func = getattr(obj, test_specs['entryPoint'])
     total_cases = len(test_specs['testcases'])
     summary = {
@@ -47,6 +47,8 @@ def run_tests(obj, test_specs, exit_on_error=True, timeout_sec=5):
     }
     tracemalloc.start()
     start = time.process_time()
+    # debug
+    timeout_sec = 100
     signal.signal(signal.SIGALRM, timeout_handler)
     signal.alarm(timeout_sec)
     log_driver_message(json.dumps({
@@ -61,12 +63,12 @@ def run_tests(obj, test_specs, exit_on_error=True, timeout_sec=5):
         }))
         try:
             summary["run"] += 1
+            # print(inp)
             out = entrypoint_func(*inp)
         except TimeoutException as e:
             summary["timeout"] = True
             return summary
         except Exception as e:
-            print("hello", e)
             summary["failed"] += 1
             formatted_lines = traceback.format_exc().splitlines()
             log_driver_message(json.dumps({

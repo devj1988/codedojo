@@ -1,13 +1,18 @@
 {
     "entryPoint": "fibonacci",
+    "timeoutSec": 5,
     "testcases": [
         {
-            "input": [1],
+            "input": [0],
             "output": 0
         },
         {
             "input": [5],
-            "output": 3
+            "output": 5
+        },
+        {
+            "input": [20],
+            "output": 6765
         }
     ]
 }

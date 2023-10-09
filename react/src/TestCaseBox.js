@@ -1,6 +1,7 @@
 
 import Tab from 'react-bootstrap/Tab';
 import Tabs from 'react-bootstrap/Tabs';
+import ProgressBar from 'react-bootstrap/ProgressBar';
 
 function formatDatetime(datetime) {
   const options = {
@@ -16,10 +17,19 @@ function formatDatetime(datetime) {
 }
 
 const getResultDesc = (result) => {
-  const {total, passed, success, last_run} = result;
+  console.log(result);
+  const {passed, total, failed, running, success, stdout} = result;
+  const progressbarpct = !running ? 100: (passed + failed)*100/total;
+  const progressbarvariant = failed === 0 ? "success" : "danger";
+  const animatedProgessBar = running ? true : false;
+
+  const status = running ? "Running" :
+          (success ? "Success" : "Failed")
+
   return <div>
-    <h3>{success ? "Success": "Failed"}</h3>
-    <p>{`${passed} out of ${total} tests passed at ${formatDatetime(last_run)}`}</p>
+    <h3>{status}</h3>
+    <ProgressBar variant={progressbarvariant} now={progressbarpct} animated={animatedProgessBar} />
+    <p>{`${passed} out of ${total} tests passed`}</p>
   </div>;
 }
 
