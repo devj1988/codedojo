@@ -16,6 +16,8 @@ const Problem = () => (
   # N-th Fibonacci number
   
   Return the n-th *fibonacci* number
+
+  ![image](https://assets.leetcode.com/uploads/2020/08/29/main.jpg)
   `}</Remark>
   );
 

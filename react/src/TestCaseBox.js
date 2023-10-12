@@ -39,9 +39,11 @@ const getResultDesc = (result) => {
           (success ? "Success" : "Failed")
 
   return <div marginTop="5px">
-    <h3>{status}</h3>
+    <div>
+      <span style={{fontWeight: 500, fontSize: "1.5rem"}}>{status}</span>{'       '}
+      {total > 0 ? <span>{`${passed}/${total} tests passed`}</span> : null }
+    </div>
     { !!stderr ? null : <ProgressBar variant={progressbarvariant} now={progressbarpct} animated={animatedProgessBar} /> }
-    {total > 0 ? <span>{`${passed} out of ${total} tests passed`}</span> : null }
     {renderStd(stdout)}
     {renderStd(stderr)}
   </div>;

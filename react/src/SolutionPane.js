@@ -130,6 +130,9 @@ export function SolutionPane({initialCode}) {
                   height="50vh"
                   extensions={[python({})]}
                   onChange={onChange}
+                  basicSetup={{
+                    autocompletion: false
+                  }}
               />
             </div>
             <div className="TestCaseBox">
