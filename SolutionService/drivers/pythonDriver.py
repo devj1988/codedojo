@@ -37,7 +37,7 @@ def get_solution_obj(usercode_module_name):
     return solution_class()
 
 
-def run_tests(obj, test_specs, exit_on_error=True, timeout_sec=10):
+def run_tests(obj, test_specs, exit_on_error=True, timeout_sec=10, showActualExpected=True):
     entrypoint_func = getattr(obj, test_specs['entryPoint'])
     total_cases = len(test_specs['testcases'])
     summary = {
@@ -49,7 +49,7 @@ def run_tests(obj, test_specs, exit_on_error=True, timeout_sec=10):
     tracemalloc.start()
     start = time.process_time()
     # debug
-    timeout_sec = 100
+    # timeout_sec = 100
     signal.signal(signal.SIGALRM, timeout_handler)
     signal.alarm(timeout_sec)
     log_driver_message(json.dumps({
@@ -62,6 +62,9 @@ def run_tests(obj, test_specs, exit_on_error=True, timeout_sec=10):
             "case": i+1,
             "status": "RUNNING"
         }))
+        result = {
+            "case": i+1
+        }
         try:
             summary["run"] += 1
             # print(inp)
@@ -72,34 +75,31 @@ def run_tests(obj, test_specs, exit_on_error=True, timeout_sec=10):
         except Exception as e:
             summary["failed"] += 1
             formatted_lines = traceback.format_exc().splitlines()
-            log_driver_message(json.dumps({
-                "case": i+1,
-                "result": "FAIL",
-                "details": {
+            if showActualExpected:
+                result["details"] = {
+                    "input_args": str(inp),
+                    "expected": case["output"],
+                    "actual": None,
                     "error_trace": formatted_lines[-1:-10:-1]
                 }
-            }))
+            log_driver_message(json.dumps(result))
             if exit_on_error:
                 break
             else:
                 continue
         if out == case["output"]:
-            log_driver_message(json.dumps({
-                "case": i+1,
-                "result": "PASS"
-            }))
+            result["result"] = "PASS"
             summary["passed"] += 1
         else:
-            log_driver_message(json.dumps({
-                "case": i+1,
-                "result": "FAIL",
-                "details": {
-                    "input_args": str(inp),
-                    "expected": case["output"],
-                    "actual": out
-                }
-            }))
+            result["result"] = "FAIL"
             summary["failed"] += 1
+        if showActualExpected:
+            result["details"] = {
+                "input_args": str(inp),
+                "expected": case["output"],
+                "actual": out
+            }
+        log_driver_message(json.dumps(result))
     signal.alarm(0)
     end = time.process_time()
     elapsed_s = end - start

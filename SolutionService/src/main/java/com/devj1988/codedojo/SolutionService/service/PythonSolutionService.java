@@ -92,8 +92,7 @@ public class PythonSolutionService {
                 while ((line = stderrReader.readLine()) != null) {
                     stdErr.add(line);
                 }
-                Map<String, List<String>> stdmap = Map.of("stdout", stdout,
-                        "stderr", stdErr);
+                Map<String, List<String>> stdmap = Map.of("stderr", stdErr);
                 sink.next(objectMapper.writeValueAsString(stdmap));
                 sink.complete();
             } catch (IOException e) {
