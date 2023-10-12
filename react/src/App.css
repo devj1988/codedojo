@@ -42,6 +42,7 @@
 
 .Editor {
   padding: 0;
+  max-width: 50vw;
 }
 
 .EditorControls {
@@ -68,7 +69,6 @@
   padding: 0.5rem;
   padding-top: 0px;
   padding-right: 0px;
-  overflow: scroll;
   padding-left: 0px;
 }
 
@@ -76,6 +76,15 @@
   border-bottom: solid;
   border-color: #ddd;
   border-width: thin;
+}
+
+.TestCaseBox .tab-content {
+  overflow: scroll;
+  height: 22.5vh;
+}
+
+ul.TestCasePills {
+  margin-top: 15px;
 }
 
 .TestCasePills li {
@@ -96,22 +105,57 @@
 
 .inputCard {
   margin-top: 15px;
-  padding: 10px;
+  padding: 4px;
   background: #ddd;
   border-radius: 4px;
-  font-size: 0.875rem;
+  font-size: 0.75rem;
+}
+
+.errorCard {
+  margin-top: 15px;
+  padding: 4px;
+  background: #d3a0a0;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  color: #ac0f0f;
 }
 
 .StdErrBox {
-  width: 50vh;
-  height: 88px;
+  max-width: inherit;
+  height: 10vh;
   overflow-y: scroll;
-  font-size: 12px;
+  font-size: 0.75rem;
   border: solid;
-  border-radius: 10px;
+  border-radius: 4px;
   padding: 4px;
-  border-color: #FEB2B2;
-  background-color: #FEB2B2;
+  border-color: #d3a0a0;
+  background-color: #d3a0a0;
+  color: #ac0f0f;
+}
+
+.StdoutHeader {
+  margin-top: 15px; 
+  margin-bottom: 4px;
+}
+
+.StdErrHeader {
+  margin-top: 15px; 
+  margin-bottom: 4px;
+}
+
+.StdoutBox {
+  height: 10vh;
+  overflow: scroll;
+  border: solid;
+  padding: 4px;
+  background: #ddd;
+  border-color: #ddd;
+  border-radius: 4px;
+  font-size: 0.75rem;
+}
+
+.MarkupText img {
+  width: 100%;
 }
 
 .RunButton {

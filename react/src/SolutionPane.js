@@ -1,6 +1,4 @@
-import React, {useRef, useState} from 'react';
-import CodeMirror from '@uiw/react-codemirror';
-import { python } from '@codemirror/lang-python';
+import React, {useCallback, useRef, useState} from 'react';
 import Button from 'react-bootstrap/Button';
 import { TestCaseBox } from './TestCaseBox';
 import { fetchEventSource } from "@microsoft/fetch-event-source";
@@ -9,6 +7,7 @@ import Dropdown from 'react-bootstrap/Dropdown';
 import DropdownButton from 'react-bootstrap/DropdownButton';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import { FaArrowRotateLeft } from 'react-icons/fa6';
+import Editor from './Editor';
 
 const testCases = [
   {"input": "n=1", "output": 1},
@@ -41,6 +40,12 @@ function LanguageSelection() {
 export function SolutionPane({initialCode}) {
     const codeRef = useRef(initialCode);
     const [result, setResult] = useState({});
+    const [initialCodeState, setInitialCodeState] = useState(initialCode);
+
+    const resetCode = useCallback(() => {
+      setInitialCodeState("");
+      setTimeout(()=>setInitialCodeState(initialCode), 0)
+    }, [initialCode])
 
     const onChange = React.useCallback((value, viewUpdate) => {
       codeRef.current = value;
@@ -50,10 +55,12 @@ export function SolutionPane({initialCode}) {
       setResult(sampleResult);
     }
 
+    const [activeTestCaseBoxTab, setActiveTestCaseBoxTab] = useState("testcase");
+
     const submitSolution = () => {
       const userCode = codeRef.current;
       console.log(userCode);
-      const resultState = {passed: 0, total: 0, failed: 0, running: false};
+      const resultState = {passed: 0, total: 0, failed: 0, running: false, complete: false, cases: []};
       const fetchData = async (userCode) => {
         console.log("fetchData called");
         await fetchEventSource(`http://localhost:8082/submitSolution`, {
@@ -72,6 +79,7 @@ export function SolutionPane({initialCode}) {
             if (res.ok && res.status === 200) {
               console.log("Connection made ", res);
               setResult(resultState);
+              setActiveTestCaseBoxTab("result");
             } else if (
               res.status >= 400 &&
               res.status < 500 &&
@@ -92,11 +100,31 @@ export function SolutionPane({initialCode}) {
               } else if (parsedData["result"] === "FAIL") {
                 resultState["failed"] += 1;
               }
+              if (parsedData["details"]) {
+                resultState.cases.push({
+                  "case": parsedData["case"],
+                  "details": parsedData["details"]
+                });
+              }
+              if (parsedData["stdout"]) {
+                const caseItem = resultState.cases.filter(caseItem => caseItem["case"] === parsedData["case"]);
+                if (caseItem && caseItem[0] && caseItem[0].details) {
+                  caseItem[0].details["stdout"] = parsedData["stdout"];
+                }
+              }
             } else if (parsedData["exit"]) {
               resultState["running"] = false;
               resultState["success"] = resultState["passed"] === resultState["total"];
-            } else if (parsedData["stdout"]) {
-              resultState["stdout"] = parsedData["stdout"];
+              if (parsedData["summary"] && parsedData["summary"]["timeout"] === true) {
+                resultState["timeout"] = true;
+              }
+              if (parsedData["error"]) {
+                resultState["error"] = true;
+                resultState["errorMsg"] = parsedData["error_msg"]
+              }
+            } else if (parsedData["stderr"] !== undefined) {
+              resultState["complete"] = true;
+              resultState["error"] = resultState["error"] || parsedData["stderr"].length > 0;
               resultState["stderr"] = parsedData["stderr"];
             }
             console.log("setResult called", resultState);
@@ -119,12 +147,12 @@ export function SolutionPane({initialCode}) {
             <div className="EditorControls">
               <Stack direction="horizontal" gap={3}>
                   <LanguageSelection />
-                  <Button variant="secondary"  className="ms-auto RunButton" onClick={runTests} size='sm'>
+                  <Button variant="secondary"  className="ms-auto RunButton" onClick={()=> resetCode()} size='sm'>
                     <FaArrowRotateLeft />
                   </Button>
               </Stack>
             </div>
-            <div className="Editor">
+            {/* <div className="Editor">
               <CodeMirror
                   value={initialCode}
                   height="50vh"
@@ -134,7 +162,8 @@ export function SolutionPane({initialCode}) {
                     autocompletion: false
                   }}
               />
-            </div>
+            </div> */}
+            <Editor initialCode={initialCodeState} onChange={onChange} />
             <div className="TestCaseBox">
               <TestCaseBox testcases={testCases} result={result}/>
             </div>

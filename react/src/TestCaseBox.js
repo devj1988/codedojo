@@ -21,30 +21,62 @@ const renderStd = (stdoutorerr) => {
     return null;
   }
   return <div style={{ }}>
-    <h4>Stderr</h4>
+    <h5 className='StdErrHeader'>Stderr</h5>
     <div className='StdErrBox'>
-      {stdoutorerr.map(line => (<p>{line}</p>))}
+      {stdoutorerr.map(line => (<><span>{line}</span><br/></>))}
     </div>
   </div>;
 }
 
+const renderCases = (cases) => {
+  if (!cases || cases.length === 0) {
+    return null;
+  }
+  return (
+      <Tabs
+        variant='pills'
+        className='mt-2 TestCasePills'
+        defaultActiveKey="case-1"
+      >
+        {cases.map(
+          function(item, i) {
+            return <Tab eventKey={`case-${i+1}`} title={`Case ${i+1}`}>
+                    <div className="inputCard" body>Expected: {item["details"]["expected"]}</div>
+                    <div className="inputCard" body>Actual: {item["details"]["actual"]}</div>
+                    <p className='StdoutHeader'>Stdout</p>
+                    <div className='StdoutBox'>
+                      {(item["details"]["stdout"] || ["\n"]).map(line => (<p>{line}</p>))}
+                    </div>
+                  </Tab>
+        }
+        )}
+    </Tabs>);
+}
+
 const getResultDesc = (result) => {
   console.log("Result", result);
-  const {passed, total, failed, running, success, stdout, stderr} = result;
+  const {passed, total, failed, running, success, stderr, complete, timeout, error, errorMsg, cases} = result;
   const progressbarpct = !running ? 100: (passed + failed)*100/total;
-  const progressbarvariant = failed === 0 ? "success" : "danger";
+  const progressbarvariant = !error && ((!complete && failed === 0) || (complete && passed === total)) ? "success" : "danger";
   const animatedProgessBar = running ? true : false;
 
-  const status = running ? "Running" :
+  let status = "";
+  if (error) {
+    status = "Error";
+  } else {
+    status = running ? "Running" :
           (success ? "Success" : "Failed")
+  }
 
   return <div marginTop="5px">
     <div>
       <span style={{fontWeight: 500, fontSize: "1.5rem"}}>{status}</span>{'       '}
       {total > 0 ? <span>{`${passed}/${total} tests passed`}</span> : null }
+      {timeout ? <span>(Timeout)</span> : null}
     </div>
-    { !!stderr ? null : <ProgressBar variant={progressbarvariant} now={progressbarpct} animated={animatedProgessBar} /> }
-    {renderStd(stdout)}
+    { <ProgressBar variant={progressbarvariant} now={progressbarpct} animated={animatedProgessBar} /> }
+    {complete && cases ? renderCases(cases) : null}
+    {errorMsg ? <div className="errorCard" body>{errorMsg}</div>: null}
     {renderStd(stderr)}
   </div>;
 }
@@ -53,14 +85,13 @@ export const TestCaseBox = (props) => {
   const {testcases, result} = props;
   return (
     <Tabs
-      defaultActiveKey="testcase"
-      className="mb-4"
+      defaultActiveKey={"testcase"}
       variant='underline'
     >
       <Tab eventKey="testcase" title="Testcase">
         <Tabs
           variant='pills'
-          className='mt-2 TestCasePills'
+          className='TestCasePills'
           defaultActiveKey="case-1"
         >
            {testcases.map(
