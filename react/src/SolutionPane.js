@@ -4,6 +4,11 @@ import { python } from '@codemirror/lang-python';
 import Button from 'react-bootstrap/Button';
 import { TestCaseBox } from './TestCaseBox';
 import { fetchEventSource } from "@microsoft/fetch-event-source";
+import Stack from 'react-bootstrap/Stack';
+import Dropdown from 'react-bootstrap/Dropdown';
+import DropdownButton from 'react-bootstrap/DropdownButton';
+import ButtonGroup from 'react-bootstrap/ButtonGroup';
+import { FaArrowRotateLeft } from 'react-icons/fa6';
 
 const testCases = [
   {"input": "n=1", "output": 1},
@@ -18,8 +23,23 @@ const sampleResult = {
   "last_run": Date.now()
 }
 
+function LanguageSelection() {
+  return (
+    <DropdownButton
+            as={ButtonGroup}
+            size="sm"
+            variant="secondary"
+            title="Python"
+          >
+            <Dropdown.Item eventKey="1">Python</Dropdown.Item>
+            <Dropdown.Item eventKey="2">Java</Dropdown.Item>
+            <Dropdown.Item eventKey="3">Go</Dropdown.Item>
+    </DropdownButton>
+  );
+}
+
 export function SolutionPane({initialCode}) {
-    const codeRef = useRef();
+    const codeRef = useRef(initialCode);
     const [result, setResult] = useState({});
 
     const onChange = React.useCallback((value, viewUpdate) => {
@@ -33,7 +53,7 @@ export function SolutionPane({initialCode}) {
     const submitSolution = () => {
       const userCode = codeRef.current;
       console.log(userCode);
-      const result = {passed: 0, total: 0, failed: 0, running: false};
+      const resultState = {passed: 0, total: 0, failed: 0, running: false};
       const fetchData = async (userCode) => {
         console.log("fetchData called");
         await fetchEventSource(`http://localhost:8082/submitSolution`, {
@@ -51,6 +71,7 @@ export function SolutionPane({initialCode}) {
           onopen(res) {
             if (res.ok && res.status === 200) {
               console.log("Connection made ", res);
+              setResult(resultState);
             } else if (
               res.status >= 400 &&
               res.status < 500 &&
@@ -63,23 +84,23 @@ export function SolutionPane({initialCode}) {
             console.log(event.data);
             const parsedData = JSON.parse(event.data);
             if (parsedData["status"] === "init") {
-              result["running"] = true;
-              result["total"] = parsedData["total"]
+              resultState["running"] = true;
+              resultState["total"] = parsedData["total"]
             } else if (parsedData["case"]) {
               if (parsedData["result"] === "PASS") {
-                result["passed"] += 1;
+                resultState["passed"] += 1;
               } else if (parsedData["result"] === "FAIL") {
-                result["failed"] += 1;
+                resultState["failed"] += 1;
               }
             } else if (parsedData["exit"]) {
-              result["running"] = false;
-              result["success"] = result["passed"] === result["total"];
+              resultState["running"] = false;
+              resultState["success"] = resultState["passed"] === resultState["total"];
             } else if (parsedData["stdout"]) {
-              result["stdout"] = parsedData["stdout"];
-              result["stderr"] = parsedData["stderr"];
+              resultState["stdout"] = parsedData["stdout"];
+              resultState["stderr"] = parsedData["stderr"];
             }
-            console.log("setResult called", result);
-            setResult(result);
+            console.log("setResult called", resultState);
+            setResult({...resultState});
           },
           onclose() {
             console.log("Connection closed by the server");
@@ -94,19 +115,32 @@ export function SolutionPane({initialCode}) {
     }
     
     return (
-        <div>
-            <CodeMirror
-                value={initialCode}
-                height="400px"
-                extensions={[python({})]}
-                onChange={onChange}
-                ref={codeRef}
-            />
-            <TestCaseBox testcases={testCases} result={result}/>
-            <div style={{"display": "flex", marginTop: '10px'}}>
-              <Button variant="primary" onClick={runTests}>Run</Button>
-              <Button variant="primary" onClick={submitSolution}>Submit</Button>
+        <Stack>
+            <div className="EditorControls">
+              <Stack direction="horizontal" gap={3}>
+                  <LanguageSelection />
+                  <Button variant="secondary"  className="ms-auto RunButton" onClick={runTests} size='sm'>
+                    <FaArrowRotateLeft />
+                  </Button>
+              </Stack>
             </div>
-      </div>
+            <div className="Editor">
+              <CodeMirror
+                  value={initialCode}
+                  height="50vh"
+                  extensions={[python({})]}
+                  onChange={onChange}
+              />
+            </div>
+            <div className="TestCaseBox">
+              <TestCaseBox testcases={testCases} result={result}/>
+            </div>
+            <div className="p-2">
+              <Stack direction="horizontal" style={{flexDirection: "row-reverse"}} gap={3}>
+                  <Button variant="success" className="SubmitButton" onClick={submitSolution} size='sm' style={{width: "80px"}}>Submit</Button>
+                  <Button variant="secondary"  className="RunButton" onClick={runTests} size='sm'>Run</Button>
+              </Stack>
+            </div>
+      </Stack>
     );
   }

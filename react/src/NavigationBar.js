@@ -6,10 +6,10 @@ import NavDropdown from 'react-bootstrap/NavDropdown';
 function NavigationBar() {
   return (
     <Navbar expand="lg" className="bg-body-tertiary">
-      <Container>
-        <Navbar.Brand href="#home">Code-dojo</Navbar.Brand>
+      <Container className='Navbar'>
+        <Navbar.Brand href="#home">Code Dojo</Navbar.Brand>
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
-        <Navbar.Collapse id="basic-navbar-nav">
+        <Navbar.Collapse id="basic-navbar-nav" className="justify-content-end">
           <Nav className="me-auto">
             <Nav.Link href="#link">Problems</Nav.Link>
             <NavDropdown title="Account" id="basic-nav-dropdown">
