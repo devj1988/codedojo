@@ -1,7 +1,11 @@
 package com.devj1988.codedojo.SolutionService.service;
 
 import com.devj1988.codedojo.SolutionService.dto.SubmissionRequest;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.Builder;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.joda.time.DateTime;
@@ -14,6 +18,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Component
 @Slf4j
@@ -62,13 +67,25 @@ public class PythonSolutionService {
                 List<String> stdErr = new ArrayList<>();
                 String line = null;
                 int stdoutLineCount = 0;
+                int currentTestCase = -1;
                 while ((line = stdoutReader.readLine()) != null) {
                     if (line.startsWith(DRIVER_MSG)) {
                         sink.next(format(line.substring(DRIVER_MSG.length())));
+                        TestCaseStatus testCaseStatus = getTestCaseStatus(line);
+                        if (testCaseStatus != null) {
+                            if (testCaseStatus.status.equals("RUNNING")) {
+                                currentTestCase = testCaseStatus.caseNumber;
+                                stdout = new ArrayList<>();
+                            } else {
+                                sink.next(getStdOutMessage(currentTestCase, stdout));
+                            }
+                        }
                     } else {
                         stdoutLineCount++;
                         if (stdoutLineCount < stdoutLineLimit) {
                             stdout.add(line);
+                        } else if (stdoutLineCount == stdoutLineLimit) {
+                            stdout.add(String.format("....(truncated to %d lines)", stdoutLineLimit));
                         }
                     }
                 }
@@ -84,6 +101,38 @@ public class PythonSolutionService {
             }
 
         });
+    }
+
+    private String getStdOutMessage(int currentTestCase, List<String> stdout) {
+        try {
+            return objectMapper.writeValueAsString(Map.of("case", currentTestCase, "stdout", stdout));
+        } catch (JsonProcessingException e) {
+            log.error("Failed to write case stdout", e);
+        }
+        return "{}";
+    }
+
+    private TestCaseStatus getTestCaseStatus(String line) {
+        if (!line.startsWith(DRIVER_MSG)) {
+            return null;
+        }
+        line = line.substring(DRIVER_MSG.length());
+
+        try {
+            JsonNode tree = objectMapper.readTree(line);
+            JsonNode caseNode = tree.get("case");
+            String status = Optional.ofNullable(tree.get("status")).map(x->x.asText())
+                    .orElse("");
+            String result = Optional.ofNullable(tree.get("result")).map(x->x.asText())
+                    .orElse("");
+            return TestCaseStatus.builder()
+                    .caseNumber(caseNode.asInt())
+                    .status(status)
+                    .result(result)
+                    .build();
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     private String format(String string) {
@@ -109,5 +158,13 @@ public class PythonSolutionService {
             log.error("error writing code to file", e);
         }
         return fileName;
+    }
+
+    @Data
+    @Builder
+    private static class TestCaseStatus {
+        private int caseNumber;
+        private String status;
+        private String result;
     }
 }

@@ -1,4 +1,4 @@
-import json, importlib, traceback, tracemalloc, time, signal, argparse
+import json, importlib, traceback, tracemalloc, time, signal, argparse, sys
 
 
 def format_bytes(total_bytes):
@@ -11,6 +11,7 @@ def format_bytes(total_bytes):
 
 def log_driver_message(msg):
     print(f"DRIVER_MSG {msg}")
+    sys.stdout.flush()
 
 
 def read_json_from_file(testfile):
