@@ -104,7 +104,7 @@ export const TestCaseBox = (props) => {
        </Tabs>
       </Tab>
       <Tab eventKey="result" title="Result">
-        {Object.keys(result).length === 0 ? "Click Run or Submit to see Results" : getResultDesc(result)}
+        {Object.keys(result).length === 0 ? <div class="ResultPlaceHolder">Click Run or Submit to see Results</div>: getResultDesc(result)}
       </Tab>
     </Tabs>
   );
