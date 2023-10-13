@@ -32,6 +32,8 @@
   border-width: thin;
   background-color: white;
   padding-top: 0px;
+  max-height: 91vh;
+  overflow: scroll;
 }
 
 .ProblemPane ul {

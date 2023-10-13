@@ -9,7 +9,10 @@ const Problem = () => (
   
   Return the n-th *fibonacci* number
 
-  ![image](https://assets.leetcode.com/uploads/2020/08/29/main.jpg)
+  ![image](https://i.pinimg.com/originals/98/82/d5/9882d569f7e0b5665fe3b2edd5069b06.png)
+
+  0 <= n <= 200
+
   `}</Remark>
   </div>
   );
