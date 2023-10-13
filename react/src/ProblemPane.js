@@ -2,18 +2,9 @@ import { Remark } from 'react-remark';
 import Tab from 'react-bootstrap/Tab';
 import Tabs from 'react-bootstrap/Tabs';
 
-const Problem = () => (
+const Problem = ({description}) => (
   <div className="MarkupText">
-    <Remark>{`
-  # N-th Fibonacci number
-  
-  Return the n-th *fibonacci* number
-
-  ![image](https://i.pinimg.com/originals/98/82/d5/9882d569f7e0b5665fe3b2edd5069b06.png)
-
-  0 <= n <= 200
-
-  `}</Remark>
+    <Remark>{description}</Remark>
   </div>
   );
 
@@ -25,15 +16,16 @@ Here's how to solve this...
 `}</Remark>
 );
   
-const ProblemPane = () => {
+const ProblemPane = ({problemDetails}) => {
+  const {description} = problemDetails;
   return (
     <Tabs
       defaultActiveKey="problem"
-      className="mb-4"
+      className="mb-2"
       variant='underline'
     >
       <Tab eventKey="problem" title="Problem">
-        <Problem/>
+        <Problem description={description}/>
       </Tab>
       <Tab eventKey="editorial" title="Editorial">
         <Editorial/>

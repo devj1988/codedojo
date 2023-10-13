@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { SolutionPane } from './SolutionPane';
 import ProblemPane  from './ProblemPane';
 import Container from 'react-bootstrap/Container';
@@ -6,6 +6,9 @@ import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 
 export const Body = () => {
+
+    const [initialCode, setInitialCode] = useState("");
+    const [problemDetails, setProblemDetails] = useState({});
 
     useEffect(() => {
         async function getProblem() {
@@ -22,31 +25,21 @@ export const Body = () => {
             }
 
             const json = await response.json();
-            console.log(json);
+            if (json.solutionStubs && json.solutionStubs.python) {
+                setInitialCode(json.solutionStubs.python);
+            }
+            setProblemDetails({
+                description: json.description
+            });
         };
         getProblem();
     }, []);
 
-  const initialCode = `class Solution:
-  def fibonacci(self, n):
-    # your code here
-
-`;
-
-//   return (
-//     <div className='Body' style={{display: 'flex', flexDirection: 'row'}}>
-//         <div style={{width: '50%', height: '100%'}}>
-//             <Problem />
-//         </div>
-//         <div style={{width: '50%', height: '100%'}}>
-//             <SolutionPane className="SolutionPane" initialCode={initialCode}/>
-//         </div>
-//     </div>);
     return (
         <Container className='Body'>
             <Row>
                 <Col className="ProblemPane">
-                    <ProblemPane/>
+                    <ProblemPane problemDetails={problemDetails}/>
                 </Col>
                 <Col className='SolutionPane'>
                     <SolutionPane initialCode={initialCode}/>

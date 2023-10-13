@@ -1,4 +1,4 @@
-import React, {useCallback, useRef, useState} from 'react';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import Button from 'react-bootstrap/Button';
 import { TestCaseBox } from './TestCaseBox';
 import { fetchEventSource } from "@microsoft/fetch-event-source";
@@ -43,9 +43,15 @@ export function SolutionPane({initialCode}) {
     const [initialCodeState, setInitialCodeState] = useState(initialCode);
 
     const resetCode = useCallback(() => {
+      console.log("resetting code");
       setInitialCodeState("");
       setTimeout(()=>setInitialCodeState(initialCode), 0)
-    }, [initialCode])
+    }, [initialCode]);
+
+    useEffect(() => {
+      setInitialCodeState("");
+      setTimeout(()=>setInitialCodeState(initialCode), 0)
+    }, [initialCode]);
 
     const onChange = React.useCallback((value, viewUpdate) => {
       codeRef.current = value;
