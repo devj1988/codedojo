@@ -1,6 +1,6 @@
 package com.devj1988.codedojo.controller;
 
-import com.devj1988.codedojo.dto.Problem;
+import com.devj1988.codedojo.dto.ProblemDTO;
 import com.devj1988.codedojo.dto.SubmissionRequest;
 import com.devj1988.codedojo.service.ProblemService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,8 +27,8 @@ public class ProblemPageController {
     }
     @GetMapping("/problem/{id}")
     @CrossOrigin
-    public ResponseEntity<Problem> getProblem(@PathVariable int id) {
-        Optional<Problem> problemOptional = problemService.getProblem(id);
+    public ResponseEntity<ProblemDTO> getProblem(@PathVariable int id) {
+        Optional<ProblemDTO> problemOptional = problemService.getProblem(id);
         return ResponseEntity.of(problemOptional);
     }
 

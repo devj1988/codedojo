@@ -8,7 +8,7 @@ import java.util.Map;
 
 @Data
 @Builder
-public class Problem {
+public class ProblemDTO {
     int problemId;
     String title;
     String description;

@@ -2,4 +2,13 @@ server.port: 8082
 solutionservice:
   host: localhost
   port: 8083
-debug: true
+#debug: true
+
+spring:
+  data:
+    mongodb:
+      username: darth
+      password: vader
+      host: localhost
+      port: 27017
+      database: codeDojo

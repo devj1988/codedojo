@@ -1,23 +1,35 @@
 package com.devj1988.codedojo.service;
 
-import com.devj1988.codedojo.dto.Problem;
+import com.devj1988.codedojo.db.model.Problem;
+import com.devj1988.codedojo.db.model.ProblemRepository;
+import com.devj1988.codedojo.dto.ProblemDTO;
 import com.devj1988.codedojo.dto.TestCase;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Component
 public class ProblemService {
-    public Optional<Problem> getProblem(int problemId) {
+
+    ProblemRepository problemRepository;
+
+    @Autowired
+    public ProblemService(ProblemRepository problemRepository) {
+        this.problemRepository = problemRepository;
+    }
+
+    public Optional<ProblemDTO> getProblem(int problemId) {
+        Problem problem = problemRepository.findProblemByNumber(problemId);
+        if (problem == null) {
+            return Optional.empty();
+        }
         problemId = 1;
-        Problem p = Problem.builder()
+        ProblemDTO p = ProblemDTO.builder()
                 .problemId(problemId)
-                .title("Fibonacci number")
-                .description("Return nth number in Fibonacci series")
-                .solutionStubs(getSolutionStubs(problemId))
+                .title(problem.getTitle())
+                .description(problem.getDescription())
+                .solutionStubs(getSolutionStubs(problem.getSolutionStubs()))
                 .testCaseList(getTestCases(problemId))
                 .build();
         return Optional.of(p);
@@ -40,13 +52,11 @@ public class ProblemService {
                 );
     }
 
-    private Map<String, String> getSolutionStubs(int problemId) {
-        return Map.of("python", "class Solution:\n" +
-                "\tdef fibonacci(self, n):\n" +
-                "\t\t# your code here");
+    private Map<String, String> getSolutionStubs(List<Problem.SolutionStub> stubs) {
+        Map<String, String> solutionStubsMap = new HashMap<>();
+        for (Problem.SolutionStub stub : stubs) {
+            solutionStubsMap.put(stub.getLanguage(), stub.getCode());
+        }
+        return solutionStubsMap;
     }
-
-
-
-
 }
