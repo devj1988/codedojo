@@ -145,7 +145,7 @@ public class PythonSolutionService {
     }
 
     private String getTestFile() {
-        return "./testFiles/testcases-1.json";
+        return "./testFiles/testcases-sample-1.json";
     }
     private String saveUserCode(String code) {
         String fileName = DigestUtils.md5Hex(code + DateTime.now().toString());

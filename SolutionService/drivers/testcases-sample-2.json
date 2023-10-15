@@ -1,0 +1,33 @@
+{
+    "entryPoint": "reverse",
+    "timeoutSec": 5,
+    "inputVars": [
+        {
+            "name": "head",
+            "type": "ll.Node"
+        }
+    ],
+    "outputVars": [
+        {
+            "type": "ll.Node"
+        }
+    ],
+    "testcases": [
+        {
+            "input": [[]],
+            "output": [[]]
+        },
+        {
+            "input": [[1]],
+            "output": [[1]]
+        },
+        {
+            "input": [[1,2,3]],
+            "output": [[3,2,1]]
+        },
+        {
+            "input": [[1,2,3,4,5]],
+            "output": [[5,4,3,2,1]]
+        }
+    ]
+}
