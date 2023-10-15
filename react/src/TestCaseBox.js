@@ -86,11 +86,12 @@ const getResultDesc = (result) => {
 }
 
 export const TestCaseBox = (props) => {
-  const {testcases, result} = props;
+  const {testcases, result, activeTab, setActiveTab} = props;
   return (
     <Tabs
-      defaultActiveKey={"testcase"}
       variant='underline'
+      activeKey={activeTab}
+      onSelect={(key) => setActiveTab(key)}
     >
       <Tab eventKey="testcase" title="Testcase">
         <Tabs

@@ -64,12 +64,14 @@ export function SolutionPane({initialCode}) {
     }, []);
 
     const runTests = () => {
+      setActiveTestCaseBoxTab("result");
       setResult(sampleResult);
     }
 
     const [activeTestCaseBoxTab, setActiveTestCaseBoxTab] = useState("testcase");
 
     const submitSolution = () => {
+      setActiveTestCaseBoxTab("result");
       const userCode = codeRef.current;
       console.log(userCode);
       const resultState = {passed: 0, total: 0, failed: 0, running: false, complete: false, cases: []};
@@ -168,22 +170,11 @@ export function SolutionPane({initialCode}) {
                   </Button>
               </Stack>
             </div>
-            {/* <div className="Editor">
-              <CodeMirror
-                  value={initialCode}
-                  height="50vh"
-                  extensions={[python({})]}
-                  onChange={onChange}
-                  basicSetup={{
-                    autocompletion: false
-                  }}
-              />
-            </div> */}
             <Editor initialCode={initialCodeState} onChange={onChange} />
             <div className="TestCaseBox">
-              <TestCaseBox testcases={testCases} result={result}/>
+              <TestCaseBox testcases={testCases} result={result} activeTab={activeTestCaseBoxTab} setActiveTab={(key) => setActiveTestCaseBoxTab(key)}/>
             </div>
-            <div className="p-2">
+            <div className="SubmitButtonRow">
               <Stack direction="horizontal" style={{flexDirection: "row-reverse"}} gap={3}>
                   <Button variant="success" className="SubmitButton" onClick={submitSolution} size='sm' style={{width: "80px"}}>Submit</Button>
                   <Button variant="secondary"  className="RunButton" onClick={runTests} size='sm'>Run</Button>
