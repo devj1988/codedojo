@@ -55,7 +55,8 @@ const renderCases = (cases) => {
 
 const getResultDesc = (result) => {
   console.log("Result", result);
-  const {passed, total, failed, running, success, stderr, complete, timeout, error, errorMsg, cases} = result;
+  const {passed, total, failed, running, success, stderr, 
+    complete, timeout, error, errorMsg, cases, memoryUsed, timeTaken} = result;
   const progressbarpct = !running ? 100: (passed + failed)*100/total;
   const progressbarvariant = !error && ((!complete && failed === 0) || (complete && passed === total)) ? "success" : "danger";
   const animatedProgessBar = running ? true : false;
@@ -73,6 +74,9 @@ const getResultDesc = (result) => {
       <span style={{fontWeight: 500, fontSize: "1.5rem"}}>{status}</span>{'       '}
       {total > 0 ? <span>{`${passed}/${total} tests passed`}</span> : null }
       {timeout ? <span>(Timeout)</span> : null}
+    </div>
+    <div>
+      {memoryUsed && timeTaken ? <span style={{fontSize: ".75rem"}}>[Memory used: {memoryUsed}, Time Taken: {timeTaken}s]</span> : null}
     </div>
     { <ProgressBar variant={progressbarvariant} now={progressbarpct} animated={animatedProgessBar} /> }
     {complete && cases ? renderCases(cases) : null}

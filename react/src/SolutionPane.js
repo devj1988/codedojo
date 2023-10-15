@@ -45,12 +45,18 @@ export function SolutionPane({initialCode}) {
     const resetCode = useCallback(() => {
       console.log("resetting code");
       setInitialCodeState("");
-      setTimeout(()=>setInitialCodeState(initialCode), 0)
+      setTimeout(()=> { 
+        setInitialCodeState(initialCode)
+        codeRef.current = initialCode;
+      }, 0)
     }, [initialCode]);
 
     useEffect(() => {
       setInitialCodeState("");
-      setTimeout(()=>setInitialCodeState(initialCode), 0)
+      setTimeout(()=> {
+        setInitialCodeState(initialCode)
+        codeRef.current = initialCode;
+       }, 0)
     }, [initialCode]);
 
     const onChange = React.useCallback((value, viewUpdate) => {
@@ -121,8 +127,12 @@ export function SolutionPane({initialCode}) {
             } else if (parsedData["exit"]) {
               resultState["running"] = false;
               resultState["success"] = resultState["passed"] === resultState["total"];
-              if (parsedData["summary"] && parsedData["summary"]["timeout"] === true) {
-                resultState["timeout"] = true;
+              if (parsedData["summary"]) {
+                if (parsedData["summary"]["timeout"] === true){
+                  resultState["timeout"] = true;
+                }
+                resultState["memoryUsed"] = parsedData["summary"]["peak_mem_usage_formatted"];
+                resultState["timeTaken"] = parsedData["summary"]["cpu_time_taken_s"];
               }
               if (parsedData["error"]) {
                 resultState["error"] = true;

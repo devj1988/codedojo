@@ -1,6 +1,12 @@
 {
     "entryPoint": "fibonacci",
     "timeoutSec": 5,
+    "inputVars": [
+        {
+            "name": "n",
+            "type": "int"
+        }
+    ],
     "testcases": [
         {
             "input": [0],
