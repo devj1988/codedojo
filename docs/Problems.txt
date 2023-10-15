@@ -1,0 +1,12 @@
+Problems
+
+ - how to store test files: DB for now
+ - how to determine timeout for a test suite
+ - how to allocate enough time to all test runs?
+ 	 Timeout based on wall clock time. What if server is overloaded and a test doesn't get time to run?
+ 	 	- emit metric for total cpu time taken when timeout occurs.
+ 	 	- metric for total CPU consumption
+ - scalability
+ 	- make test runs faster:
+ 		- reduce startup time for test runs
+ 		- py server that takes code file as input and maintains test objects in a cache

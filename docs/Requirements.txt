@@ -1,0 +1,62 @@
+CODE DOJO REQUIREMENTS DOC
+
+Goal: To build a Leetcode style coding platform.
+
+Stages
+ 1. Problem solving page
+ 2. Problem list page
+ 3. Streamline problem insertion
+ 4. Authentication, user management
+ 5. Deployment to GCP
+ 6. Contest feature
+
+
+1. Problem solving page
+
+	- Show problem details (title, number, level), description and editorial in Markdown format.
+	- Code Editor should support Python3
+	- Sample testcases should be shown, with expected output.
+	- Running sample test cases scenario
+		- Run button should trigger a sample test case run.
+		- Test case results should be updated dynamically (x out of y tests passed)
+		- Result should show input, with expected and actual ouptut.
+		- Any stdout should be shown
+		- Any stderr should be shown
+		- Total cpu time (not wall clock time) and memory used should be shown.
+		- There should be a timeout mechanism for long running code. 
+		- If there's timeout, it should be indicated in Results summary, along with how many test cases passed.
+	- Running full submission scenario
+		- Submit button should trigger a run.
+		- Test case results should be updated dynamically (x out of y tests passed)
+		- Result should NOT show input, NOR expected and actual ouptut. Those should be hidden and not sent to the FE.
+		- Any stdout should NOT be shown
+		- Any stderr should NOT be shown
+		- Total cpu time (not wall clock time) and memory used should be shown.
+		- There should be a timeout mechanism for long running code. 
+		- If there's timeout, it should be indicated in Results summary, along with how many test cases passed.
+	- Should be possible to reset the code editor.
+	- There should be a gap of at least 1s between consecutive Run/Submit clicks.
+	- If a submit/run button click happens while another one is in flight, the previous one should be cancelled.
+	- Following problems should be supported for now:
+	  - nth fibonacci number
+	  - reverse a linked list
+	  - 2-sum binary search tree: given binary tree and sum, find if a pair of node with the sum exists.
+	- Sanitize input: block import os for now
+
+
+2. Problem list page:
+
+	- Show a list of problems in tabular format with pagination support, 20 items per page.
+	- Each row should have problem title, number, level and link to problem solving page.
+
+3. Streamline problem insertion
+
+	- Write a script which makes it possible to upload a new problem from:
+		- problem metadata: title, level
+		- problem description Markdown file.
+		- problem Editorial Markdown file.
+		- solution code
+		- sample run test cases file
+		- full test suite file.
+
+
