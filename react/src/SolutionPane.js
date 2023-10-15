@@ -1,13 +1,13 @@
 import React, {useCallback, useEffect, useRef, useState} from 'react';
 import Button from 'react-bootstrap/Button';
 import { TestCaseBox } from './TestCaseBox';
-import { fetchEventSource } from "@microsoft/fetch-event-source";
 import Stack from 'react-bootstrap/Stack';
 import Dropdown from 'react-bootstrap/Dropdown';
 import DropdownButton from 'react-bootstrap/DropdownButton';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import { FaArrowRotateLeft } from 'react-icons/fa6';
 import Editor from './Editor';
+import { submitSolutionCall } from './api';
 
 const testCases = [
   {"input": "n=1", "output": 1},
@@ -37,7 +37,8 @@ function LanguageSelection() {
   );
 }
 
-export function SolutionPane({initialCode}) {
+export function SolutionPane({solutionStubs, problemNumber}) {
+    const initialCode = solutionStubs.python;
     const codeRef = useRef(initialCode);
     const [result, setResult] = useState({});
     const [initialCodeState, setInitialCodeState] = useState(initialCode);
@@ -63,32 +64,22 @@ export function SolutionPane({initialCode}) {
       codeRef.current = value;
     }, []);
 
-    const runTests = () => {
-      setActiveTestCaseBoxTab("result");
-      setResult(sampleResult);
-    }
-
     const [activeTestCaseBoxTab, setActiveTestCaseBoxTab] = useState("testcase");
 
-    const submitSolution = () => {
+    const submitSolution = (isSampleRun) => {
       setActiveTestCaseBoxTab("result");
       const userCode = codeRef.current;
       console.log(userCode);
       const resultState = {passed: 0, total: 0, failed: 0, running: false, complete: false, cases: []};
+      const requestBody = {
+        "problemId": problemNumber,
+        "language": "python",
+        "code": userCode,
+        "sampleRun": isSampleRun
+       };
       const fetchData = async (userCode) => {
-        console.log("fetchData called");
-        await fetchEventSource(`http://localhost:8082/submitSolution`, {
-          method: "POST",
-          headers: {
-            Accept: "text/event-stream",
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            "problemId": 1,
-            "language": "python",
-            "code": userCode,
-            "sampleRun": true
-           }),
+        console.log("fetchData called2");
+        await submitSolutionCall(requestBody, {
           onopen(res) {
             if (res.ok && res.status === 200) {
               console.log("Connection made ", res);
@@ -134,7 +125,7 @@ export function SolutionPane({initialCode}) {
                   resultState["timeout"] = true;
                 }
                 resultState["memoryUsed"] = parsedData["summary"]["peak_mem_usage_formatted"];
-                resultState["timeTaken"] = parsedData["summary"]["cpu_time_taken_s"];
+                resultState["timeTaken"] = parsedData["summary"]["cpu_time_taken_formatted"];
               }
               if (parsedData["error"]) {
                 resultState["error"] = true;
@@ -154,8 +145,7 @@ export function SolutionPane({initialCode}) {
           onerror(err) {
             console.log("There was an error from server", err);
             throw err;
-          },
-        });
+          }});
       };
       fetchData(userCode);
     }
@@ -176,8 +166,8 @@ export function SolutionPane({initialCode}) {
             </div>
             <div className="SubmitButtonRow">
               <Stack direction="horizontal" style={{flexDirection: "row-reverse"}} gap={3}>
-                  <Button variant="success" className="SubmitButton" onClick={submitSolution} size='sm' style={{width: "80px"}}>Submit</Button>
-                  <Button variant="secondary"  className="RunButton" onClick={runTests} size='sm'>Run</Button>
+                  <Button variant="success" className="SubmitButton" onClick={() => submitSolution(false)} size='sm' style={{width: "80px"}}>Submit</Button>
+                  <Button variant="secondary"  className="RunButton" onClick={() => submitSolution(true)} size='sm'>Run</Button>
               </Stack>
             </div>
       </Stack>

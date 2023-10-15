@@ -76,7 +76,7 @@ const getResultDesc = (result) => {
       {timeout ? <span>(Timeout)</span> : null}
     </div>
     <div>
-      {memoryUsed && timeTaken ? <span style={{fontSize: ".75rem"}}>[Memory used: {memoryUsed}, Time Taken: {timeTaken}s]</span> : null}
+      {memoryUsed && timeTaken ? <span style={{fontSize: ".75rem"}}>[Memory used: {memoryUsed}, Time Taken: {timeTaken}]</span> : null}
     </div>
     { <ProgressBar variant={progressbarvariant} now={progressbarpct} animated={animatedProgessBar} /> }
     {complete && cases ? renderCases(cases) : null}
@@ -109,7 +109,7 @@ export const TestCaseBox = (props) => {
        </Tabs>
       </Tab>
       <Tab eventKey="result" title="Result">
-        {Object.keys(result).length === 0 ? <div class="ResultPlaceHolder">Click Run or Submit to see Results</div>: getResultDesc(result)}
+        {Object.keys(result).length === 0 ? <div className="ResultPlaceHolder">Click Run or Submit to see Results</div>: getResultDesc(result)}
       </Tab>
     </Tabs>
   );

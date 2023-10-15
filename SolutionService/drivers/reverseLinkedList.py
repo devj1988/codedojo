@@ -11,3 +11,4 @@ class Solution(object):
             rest = p
             p = temp
         return rest
+    

@@ -4,29 +4,20 @@ import ProblemPane  from './ProblemPane';
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
+import { fetchProblemCall } from './api';
 
 export const ProblemPage = () => {
 
-    const [initialCode, setInitialCode] = useState("");
+    const [solutionStubs, setSolutionStubs] = useState("");
     const [problemDetails, setProblemDetails] = useState({});
+    const problemNumber = 1;
 
     useEffect(() => {
         async function getProblem() {
-            const response = await fetch("http://localhost:8082/problem/1",
-             { 
-                headers: {
-                Accept: 'application/json',
-                'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': '*',
-              }});
-
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-
-            const json = await response.json();
-            if (json.solutionStubs && json.solutionStubs.python) {
-                setInitialCode(json.solutionStubs.python);
+            const json = await fetchProblemCall(problemNumber);
+            console.log(json);
+            if (json.solutionStubs) {
+                setSolutionStubs(json.solutionStubs);
             }
             setProblemDetails({
                 description: json.description
@@ -42,7 +33,7 @@ export const ProblemPage = () => {
                     <ProblemPane problemDetails={problemDetails}/>
                 </Col>
                 <Col className='SolutionPane'>
-                    <SolutionPane initialCode={initialCode}/>
+                    <SolutionPane solutionStubs={solutionStubs} problemNumber={problemNumber}/>
                 </Col>
             </Row>
         </Container>

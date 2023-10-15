@@ -49,6 +49,7 @@ def input_funcs(input_defs):
             ret.append(py.ll.Node.create)
     return ret
 
+
 def output_func(output_vars):
     if len(output_vars) == 0:
         raise Exception("no output vars found")
@@ -66,18 +67,19 @@ def output_inv_transform_func(output_vars):
     else:
         return lambda x: str(x)
 
+
 def format_input(inp):
     if len(inp) == 1:
         return inp[0]
     return inp
 
+
 def format_elapsed_time(secs):
     if secs >= 1:
         return f"{secs:.2f} s"
-    elif secs < 1 and 1000*secs >= 1:
-        return f"{secs*1000:.0f} ms"
     else:
-        return f"{secs*1000*1000:.0f} micros"
+        return f"{secs*1000:.2f} ms"
+    
 
 def run_tests(obj, test_specs, exit_on_error=True, timeout_sec=10, showActualExpected=True):
     entrypoint_func = getattr(obj, test_specs['entryPoint'])
