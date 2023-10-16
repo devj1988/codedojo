@@ -16,11 +16,10 @@ export const ProblemPage = () => {
         async function getProblem() {
             const json = await fetchProblemCall(problemNumber);
             console.log(json);
-            if (json.solutionStubs) {
-                setSolutionStubs(json.solutionStubs);
-            }
+            setSolutionStubs(json.solutionStubs);
             setProblemDetails({
-                description: json.description
+                description: json.description,
+                editorial: json.editorial
             });
         };
         getProblem();

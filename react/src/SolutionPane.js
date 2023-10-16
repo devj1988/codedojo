@@ -15,12 +15,7 @@ const testCases = [
   {"input": "n=7", "output": 8},
 ]
 
-const sampleResult = {
-  "total": 10,
-  "passed": 5,
-  "success": false,
-  "last_run": Date.now()
-}
+const abortController = new AbortController()
 
 function LanguageSelection() {
   return (
@@ -42,6 +37,9 @@ export function SolutionPane({solutionStubs, problemNumber}) {
     const codeRef = useRef(initialCode);
     const [result, setResult] = useState({});
     const [initialCodeState, setInitialCodeState] = useState(initialCode);
+    const dirtySinceLastSubmit = useRef(true);
+    const lastSubmission = useRef(-1);
+
 
     const resetCode = useCallback(() => {
       console.log("resetting code");
@@ -49,6 +47,7 @@ export function SolutionPane({solutionStubs, problemNumber}) {
       setTimeout(()=> { 
         setInitialCodeState(initialCode)
         codeRef.current = initialCode;
+        dirtySinceLastSubmit.current = true;
       }, 0)
     }, [initialCode]);
 
@@ -57,17 +56,32 @@ export function SolutionPane({solutionStubs, problemNumber}) {
       setTimeout(()=> {
         setInitialCodeState(initialCode)
         codeRef.current = initialCode;
+        dirtySinceLastSubmit.current = true;
        }, 0)
     }, [initialCode]);
 
     const onChange = React.useCallback((value, viewUpdate) => {
       codeRef.current = value;
+      dirtySinceLastSubmit.current = true;
     }, []);
 
     const [activeTestCaseBoxTab, setActiveTestCaseBoxTab] = useState("testcase");
 
     const submitSolution = (isSampleRun) => {
+      abortController.abort();
       setActiveTestCaseBoxTab("result");
+      // if (dirtySinceLastSubmit.current === false) {
+      //   console.log("code hasn't changed since last submit");
+      //   return;
+      // }
+      const currentTime = Date.now();
+      if (lastSubmission.current === -1 || currentTime - lastSubmission.current > 2000) {
+        lastSubmission.current = currentTime;
+      } else {
+        console.log("you submitted too soon");
+        return;
+      }
+      dirtySinceLastSubmit.current = false;
       const userCode = codeRef.current;
       console.log(userCode);
       const resultState = {passed: 0, total: 0, failed: 0, running: false, complete: false, cases: []};
@@ -145,7 +159,8 @@ export function SolutionPane({solutionStubs, problemNumber}) {
           onerror(err) {
             console.log("There was an error from server", err);
             throw err;
-          }});
+          },
+          signal: abortController.signal});
       };
       fetchData(userCode);
     }

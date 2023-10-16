@@ -1,8 +1,12 @@
 import { fetchEventSource } from "@microsoft/fetch-event-source";
+import { ENABLE_MOCKS, fetchProblemCallMock } from "./apimocks";
 
 const apiHost = "http://localhost:8082";
 
 export const fetchProblemCall = async (problemNumber) => {
+    if (ENABLE_MOCKS) {
+        return fetchProblemCallMock;
+    }
     const response = await fetch(`${apiHost}/problem/${problemNumber}`,
              { 
                 headers: {
@@ -20,7 +24,7 @@ export const fetchProblemCall = async (problemNumber) => {
 }
 
 export const submitSolutionCall = async (requestBody, 
-    {onopen, onmessage, onclose, onerror}) => {
+    {onopen, onmessage, onclose, onerror, signal}) => {
     const url = `${apiHost}/submitSolution`;
 
     await fetchEventSource(url, {
@@ -33,7 +37,8 @@ export const submitSolutionCall = async (requestBody,
           onopen,
           onmessage,
           onclose,
-          onerror
+          onerror,
+          signal
         });
 };
 

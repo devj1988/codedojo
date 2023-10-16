@@ -187,3 +187,8 @@ ul.TestCasePills {
   padding: 0.5rem;
   padding-right: 0;
 }
+
+.progress {
+  border-radius: 0px;
+  height: .33rem;
+}
